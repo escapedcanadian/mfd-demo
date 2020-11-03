@@ -1,0 +1,35 @@
+version: "3"
+services:
+  couchbase:
+    image: couchbase:latest
+    container_name: couchbase
+    ports:
+      - "8091-8096:8091-8096"
+      - "11210-11211:11210-11211"
+    volumes:
+      - "./cbdata:/opt/couchbase/var"
+      - "../couchbase/build:/opt/couchbase/demo/build"
+
+  syncgateway:
+    image: couchbase/sync-gateway:latest
+    container_name: syncgateway
+    depends_on: 
+      - couchbase
+    ports:
+      - "4984-4985:4984-4985"
+    volumes:
+      - "./sync_gateway_config.json:/etc/sync_gateway/config.json"
+      - "./logs/sync_gateway:/var/logs/sync_gateway"
+  
+  web:
+    image: node:12.9-buster
+    container_name: web
+    working_dir: /home/node/app
+    environment: 
+      - NODE_ENV=production
+    volumes: 
+      - ../web/src:/home/node/app
+      - ./logs/web:/root/.npm/_logs
+    ports:
+      - "3000:3000"
+    command: "node server.js"

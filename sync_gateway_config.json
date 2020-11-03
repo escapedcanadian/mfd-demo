@@ -1,0 +1,38 @@
+{
+	"logging": {
+		"console": {
+			"enabled": true,
+			"log_level": "info",
+            "log_keys": ["HTTP"]
+		},
+        "log_file_path": "/var/logs/sync_gateway"
+	},
+    "interface": ":4984",
+    "adminInterface": ":4985",
+	"databases": {
+		"gameinfo": {
+            "server": "couchbase://couchbase",
+            "bucket": "gameInfo",
+            "username": "mfdsg",
+            "password": "password",
+            "enable_shared_bucket_access": true, 
+            "import_docs": true,
+            "num_index_replicas": 0,
+			"users": {
+                "GUEST": {"disabled": true, "admin_channels": ["*"] },
+                "app": {"disabled": false, "password": "password", "admin_roles": ["hunter_role"]}
+            },
+            "roles": {
+                "hunter_role":{
+                    "admin_channels": ["treasure"]
+                }
+            },
+            "sync": `
+              function(doc,oldDoc) {
+                  channel("treasure");
+                  channel("!");
+                  }`
+		}
+    }
+}
+
